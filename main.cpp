@@ -7,7 +7,7 @@
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const float PARTICLE_RADIUS = 7.5f;
+const int PARTICLE_RADIUS = 5;
 const int PARTICLE_ARRAY_SIZE = 1000;
 
 const int EMISSION_RATE = 25;
@@ -39,6 +39,7 @@ struct Particle {
 
 int findInactiveParticleIndex(Particle* array, const int size);
 void emitParticleSpacebar(Particle& particle);
+void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY);
 void updateParticles(Particle* array, const int size);
 float randf(const float min, const float max);
 
@@ -51,16 +52,22 @@ int main() {
 
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Game Loop, Input Handling, and Frames");
   while (!WindowShouldClose()) {
-    nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
 
     BeginDrawing();
     ClearBackground(BLACK);
 
     if (IsKeyDown(KEY_SPACE)) {
+      nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
       if (nextInactiveParticleIndex != -1) {
         emitParticleSpacebar(particles[nextInactiveParticleIndex]);
       }
-      // printf("%.2f\n", particles[nextInactiveParticleIndex].direction.y);
+    }
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+      nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
+      if (nextInactiveParticleIndex != -1) {
+        emitParticleMouse(particles[nextInactiveParticleIndex], GetMouseX(), GetMouseY());
+      }
     }
 
     updateParticles(particles, PARTICLE_ARRAY_SIZE);
@@ -101,6 +108,25 @@ void emitParticleSpacebar(Particle& particle) {
 }
 
 
+void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
+  particle.isActive = true;
+  particle.position.x = mouseX;
+  particle.position.y = mouseY;
+  particle.direction.x = randf(-1.0f, 1.0f);
+  particle.direction.y = randf(-1.0f, 1.0f);
+  particle.direction = Vector2Normalize(particle.direction);
+  particle.speed = randf(5.0f, 10.0f);
+  particle.lifeTime = randf(0.5f, 2.0f);
+  particle.color.r = rand() % 256;
+  particle.color.g = rand() % 256;
+  particle.color.b = rand() % 256;
+  particle.color.a = 255;
+
+  DrawCircle(particle.position.x, particle.position.y, PARTICLE_RADIUS, particle.color);
+}
+
+
+
 void updateParticles(Particle* array, const int size) {
   for (int i = 0; i < size; i++) {
     Particle& particle = array[i];
@@ -108,8 +134,8 @@ void updateParticles(Particle* array, const int size) {
       particle.isActive = false;
     }
     if (particle.isActive) {
-      particle.position.x += particle.direction.x * particle.speed / 10;
-      particle.position.y += particle.direction.y * particle.speed / 10;
+      particle.position.x += particle.direction.x * particle.speed / 20;
+      particle.position.y += particle.direction.y * particle.speed / 20;
       particle.lifeTime -= 0.01f;
       particle.color.a -= Normalize(0.01f, 0.0f, 255.0f);
       DrawCircle(particle.position.x, particle.position.y, PARTICLE_RADIUS, particle.color);
@@ -118,6 +144,7 @@ void updateParticles(Particle* array, const int size) {
 }
 
 
+// https://cplusplus.com/forum/beginner/81180/
 float randf(const float min, const float max) {	
   float result = (rand() / static_cast<float>(RAND_MAX) * (max + 1)) + min;
   return result;
