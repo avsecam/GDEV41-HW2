@@ -20,20 +20,6 @@ struct Particle {
   float speed;
   float lifeTime;
   Color color;
-
-  Particle() {
-    isActive = false;
-    position.x = 0.0f;
-    position.y = 0.0f;
-    direction.x = 0.0f;
-    direction.y = 0.0f;
-    speed = 0.0f;
-    lifeTime = 0.0f;
-    color.r = 255;
-    color.g = 0;
-    color.b = 0;
-    color.a = 255;
-  }
 };
 
 
@@ -80,6 +66,7 @@ int main() {
 }
 
 
+// Returns the index of the first inactive particle in the array
 int findInactiveParticleIndex(Particle* array, const int size) {
   for (int i = 0; i < size; i++) {
     if (!array[i].isActive) {
@@ -90,6 +77,7 @@ int findInactiveParticleIndex(Particle* array, const int size) {
 }
 
 
+// Emit particles from the bottom center of window
 void emitParticleSpacebar(Particle& particle) {
   particle.isActive = true;
   particle.position.x = WINDOW_WIDTH / 2;
@@ -108,6 +96,7 @@ void emitParticleSpacebar(Particle& particle) {
 }
 
 
+// Emit particles from mouse position
 void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
   particle.isActive = true;
   particle.position.x = mouseX;
@@ -126,7 +115,7 @@ void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
 }
 
 
-
+// Updates all particles in the array
 void updateParticles(Particle* array, const int size) {
   for (int i = 0; i < size; i++) {
     Particle& particle = array[i];
@@ -145,6 +134,7 @@ void updateParticles(Particle* array, const int size) {
 
 
 // https://cplusplus.com/forum/beginner/81180/
+// Returns a random float within min and max
 float randf(const float min, const float max) {	
   float result = (rand() / static_cast<float>(RAND_MAX) * (max + 1)) + min;
   return result;
