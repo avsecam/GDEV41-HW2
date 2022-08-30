@@ -87,11 +87,11 @@ void emitParticleSpacebar(Particle& particle) {
   particle.isActive = true;
   particle.position.x = WINDOW_WIDTH / 2;
   particle.position.y = WINDOW_HEIGHT;
-  particle.direction.x = rand() % 3 - 1;
+  particle.direction.x = randf(-1.0f, 1.0f);
   particle.direction.y = -1.0f;
   particle.direction = Vector2Normalize(particle.direction);
-  particle.speed = rand() % 5 + 5;
-  particle.lifeTime = rand() % 4 + 2;
+  particle.speed = randf(5.0f, 10.0f);
+  particle.lifeTime = randf(2.0f, 5.0f);
   particle.color.r = rand() % 256;
   particle.color.g = rand() % 256;
   particle.color.b = rand() % 256;
@@ -118,6 +118,7 @@ void updateParticles(Particle* array, const int size) {
 }
 
 
-float randf(const float min, const float max) {
-  
+float randf(const float min, const float max) {	
+  float result = (rand() / static_cast<float>(RAND_MAX) * (max + 1)) + min;
+  return result;
 }
