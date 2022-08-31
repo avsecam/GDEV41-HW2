@@ -9,8 +9,8 @@ const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 const int PARTICLE_RADIUS = 5;
 const int PARTICLE_ARRAY_SIZE = 1000;
-
-const int EMISSION_RATE = 25;
+const int EMISSION_RATE_MIN = 1;
+const int EMISSION_RATE_MAX = 50;
 
 
 struct Particle {
@@ -31,6 +31,13 @@ float randf(const float min, const float max);
 
 
 int main() {
+  int emissionRateSpacebar = 10; // [1, 50]
+  int emissionRateMouse = 50;
+  float particleTimeSpacebar = 1.0f / emissionRateSpacebar; // Max time before another particle is emitted
+  float particleTimeMouse = 1.0f / emissionRateMouse;
+  float particleCooldownSpacebar = particleTimeSpacebar; // Remaining time before emission
+  float particleCooldownMouse = particleTimeMouse;
+
   Particle* particles = new Particle[PARTICLE_ARRAY_SIZE];
   // All particles are inactive at this point. Step 4
 
@@ -38,27 +45,41 @@ int main() {
 
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Game Loop, Input Handling, and Frames");
   while (!WindowShouldClose()) {
-
     BeginDrawing();
     ClearBackground(BLACK);
 
     if (IsKeyDown(KEY_SPACE)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
-      if (nextInactiveParticleIndex != -1) {
+      if (nextInactiveParticleIndex != -1 && particleCooldownSpacebar == particleTimeSpacebar) {
         emitParticleSpacebar(particles[nextInactiveParticleIndex]);
-      }
+      } 
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
-      if (nextInactiveParticleIndex != -1) {
+      if (nextInactiveParticleIndex != -1 && particleCooldownMouse == particleTimeMouse) {
         emitParticleMouse(particles[nextInactiveParticleIndex], GetMouseX(), GetMouseY());
       }
+    }
+
+    if (IsKeyPressed(KEY_LEFT) && emissionRateSpacebar > EMISSION_RATE_MIN) {
+      emissionRateSpacebar--;
+      particleTimeSpacebar = 1.0f / emissionRateSpacebar;
+      printf("spacebar emission %i\n", emissionRateSpacebar);
+    } else if (IsKeyPressed(KEY_RIGHT) && emissionRateSpacebar < EMISSION_RATE_MAX) {
+      emissionRateSpacebar++;
+      particleTimeSpacebar = 1.0f / emissionRateSpacebar;
+      printf("spacebar emission %i\n", emissionRateSpacebar);
     }
 
     updateParticles(particles, PARTICLE_ARRAY_SIZE);
 
     EndDrawing();
+
+    particleCooldownSpacebar -= GetFrameTime();
+    particleCooldownMouse -= GetFrameTime();
+    if (particleCooldownSpacebar <= 0.0f) particleCooldownSpacebar = particleTimeSpacebar;
+    if (particleCooldownMouse <= 0.0f) particleCooldownMouse = particleTimeMouse;
   }
   delete particles;
   CloseWindow();
