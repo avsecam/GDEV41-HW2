@@ -146,8 +146,8 @@ void updateParticles(Particle* array, const int size, const float deltaTime) {
     if (particle.isActive) {
       particle.position.x += particle.direction.x * particle.speed * deltaTime;
       particle.position.y += particle.direction.y * particle.speed * deltaTime;
-      particle.lifeTime -= 0.01f;
-      particle.color.a -= Normalize(0.01f, 0.0f, 255.0f);
+      particle.lifeTime -= deltaTime;
+      particle.color.a -= Normalize(particle.lifeTime, 0.0f, 255.0f);
       DrawCircle(particle.position.x, particle.position.y, PARTICLE_RADIUS, particle.color);
     }
   }
