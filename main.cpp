@@ -18,6 +18,7 @@ struct Particle {
   Vector2 position;
   Vector2 direction;
   float speed;
+  float maxLifeTime;
   float lifeTime;
   Color color;
 };
@@ -46,7 +47,7 @@ int main() {
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Game Loop, Input Handling, and Frames");
   while (!WindowShouldClose()) {
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(WHITE);
 
     if (IsKeyDown(KEY_SPACE)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
@@ -107,7 +108,8 @@ void emitParticleSpacebar(Particle& particle) {
   particle.direction.y = -1.0f;
   particle.direction = Vector2Normalize(particle.direction);
   particle.speed = randf(50.0f, 100.0f);
-  particle.lifeTime = randf(2.0f, 5.0f);
+  particle.maxLifeTime = randf(2.0f, 5.0f);
+  particle.lifeTime = particle.maxLifeTime;
   particle.color.r = rand() % 256;
   particle.color.g = rand() % 256;
   particle.color.b = rand() % 256;
@@ -126,7 +128,8 @@ void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
   particle.direction.y = randf(-1.0f, 1.0f);
   particle.direction = Vector2Normalize(particle.direction);
   particle.speed = randf(50.0f, 100.0f);
-  particle.lifeTime = randf(0.5f, 2.0f);
+  particle.maxLifeTime = randf(0.5f, 2.0f);
+  particle.lifeTime = particle.maxLifeTime;
   particle.color.r = rand() % 256;
   particle.color.g = rand() % 256;
   particle.color.b = rand() % 256;
@@ -147,7 +150,7 @@ void updateParticles(Particle* array, const int size, const float deltaTime) {
       particle.position.x += particle.direction.x * particle.speed * deltaTime;
       particle.position.y += particle.direction.y * particle.speed * deltaTime;
       particle.lifeTime -= deltaTime;
-      particle.color.a -= Normalize(particle.lifeTime, 0.0f, 255.0f);
+      particle.color.a = Remap(particle.lifeTime, 0.0f, particle.maxLifeTime, 0.0f, 255.0f);
       DrawCircle(particle.position.x, particle.position.y, PARTICLE_RADIUS, particle.color);
     }
   }
