@@ -14,7 +14,7 @@ const int EMISSION_RATE_MAX = 50;
 
 
 struct Particle {
-  bool isActive;
+  bool isActive = false;
   Vector2 position;
   Vector2 direction;
   float speed;
@@ -26,7 +26,7 @@ struct Particle {
 int findInactiveParticleIndex(Particle* array, const int size);
 void emitParticleSpacebar(Particle& particle);
 void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY);
-void updateParticles(Particle* array, const int size);
+void updateParticles(Particle* array, const int size, const float deltaTime);
 float randf(const float min, const float max);
 
 
@@ -72,7 +72,7 @@ int main() {
       printf("spacebar emission %i\n", emissionRateSpacebar);
     }
 
-    updateParticles(particles, PARTICLE_ARRAY_SIZE);
+    updateParticles(particles, PARTICLE_ARRAY_SIZE, GetFrameTime());
 
     EndDrawing();
 
@@ -106,7 +106,7 @@ void emitParticleSpacebar(Particle& particle) {
   particle.direction.x = randf(-1.0f, 1.0f);
   particle.direction.y = -1.0f;
   particle.direction = Vector2Normalize(particle.direction);
-  particle.speed = randf(5.0f, 10.0f);
+  particle.speed = randf(50.0f, 100.0f);
   particle.lifeTime = randf(2.0f, 5.0f);
   particle.color.r = rand() % 256;
   particle.color.g = rand() % 256;
@@ -125,7 +125,7 @@ void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
   particle.direction.x = randf(-1.0f, 1.0f);
   particle.direction.y = randf(-1.0f, 1.0f);
   particle.direction = Vector2Normalize(particle.direction);
-  particle.speed = randf(5.0f, 10.0f);
+  particle.speed = randf(50.0f, 100.0f);
   particle.lifeTime = randf(0.5f, 2.0f);
   particle.color.r = rand() % 256;
   particle.color.g = rand() % 256;
@@ -137,15 +137,15 @@ void emitParticleMouse(Particle& particle, const int mouseX, const int mouseY) {
 
 
 // Updates all particles in the array
-void updateParticles(Particle* array, const int size) {
+void updateParticles(Particle* array, const int size, const float deltaTime) {
   for (int i = 0; i < size; i++) {
     Particle& particle = array[i];
     if (particle.lifeTime <= 0.0f) {
       particle.isActive = false;
     }
     if (particle.isActive) {
-      particle.position.x += particle.direction.x * particle.speed / 20;
-      particle.position.y += particle.direction.y * particle.speed / 20;
+      particle.position.x += particle.direction.x * particle.speed * deltaTime;
+      particle.position.y += particle.direction.y * particle.speed * deltaTime;
       particle.lifeTime -= 0.01f;
       particle.color.a -= Normalize(0.01f, 0.0f, 255.0f);
       DrawCircle(particle.position.x, particle.position.y, PARTICLE_RADIUS, particle.color);
