@@ -3,7 +3,24 @@
 #include <ctime>
 #include <raylib.h>
 #include <raymath.h>
+#include <fstream>
 
+void readConfigFile()
+{
+  std::ifstream configFile("./config.ini");
+  std::string s, k;
+  while(configFile >> s >> k)
+  {
+    if(s == "EMIT_BOTTOM_CENTER")
+    {
+
+    }
+    else if(s == "EMIT_CURSOR")
+    {
+
+    }
+  }
+}
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -11,6 +28,14 @@ const int PARTICLE_RADIUS = 5;
 const int PARTICLE_ARRAY_SIZE = 1000;
 const int EMISSION_RATE_MIN = 1;
 const int EMISSION_RATE_MAX = 50;
+
+
+MouseButton cursorInput = MOUSE_BUTTON_LEFT;
+KeyboardKey bottomCenterInput = KEY_SPACE;
+KeyboardKey decreaseBottomCenterEmissionRate = KEY_LEFT;
+KeyboardKey increaseBottomCenterEmissionRate = KEY_RIGHT;
+KeyboardKey decreaseCursorEmissionRate = KEY_DOWN;
+KeyboardKey increaseCursorEmissionRate = KEY_UP;
 
 
 struct Particle {
@@ -32,12 +57,14 @@ float randf(const float min, const float max);
 
 
 int main() {
-  int emissionRateSpacebar = 10; // [1, 50]
-  int emissionRateMouse = 50;
+ 
+  int emissionRateSpacebar = 20; // [1, 50]
+  int emissionRateMouse = 40;
   float particleTimeSpacebar = 1.0f / emissionRateSpacebar; // Max time before another particle is emitted
   float particleTimeMouse = 1.0f / emissionRateMouse;
   float particleCooldownSpacebar = particleTimeSpacebar; // Remaining time before emission
   float particleCooldownMouse = particleTimeMouse;
+  // readConfigFile();
 
   Particle* particles = new Particle[PARTICLE_ARRAY_SIZE];
   // All particles are inactive at this point. Step 4
@@ -49,28 +76,36 @@ int main() {
     BeginDrawing();
     ClearBackground(WHITE);
 
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyDown(bottomCenterInput)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
       if (nextInactiveParticleIndex != -1 && particleCooldownSpacebar == particleTimeSpacebar) {
         emitParticleSpacebar(particles[nextInactiveParticleIndex]);
       } 
     }
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+    if (IsMouseButtonDown(cursorInput)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
       if (nextInactiveParticleIndex != -1 && particleCooldownMouse == particleTimeMouse) {
         emitParticleMouse(particles[nextInactiveParticleIndex], GetMouseX(), GetMouseY());
       }
     }
 
-    if (IsKeyPressed(KEY_LEFT) && emissionRateSpacebar > EMISSION_RATE_MIN) {
+    if (IsKeyPressed(decreaseBottomCenterEmissionRate) && emissionRateSpacebar > EMISSION_RATE_MIN) {
       emissionRateSpacebar--;
       particleTimeSpacebar = 1.0f / emissionRateSpacebar;
       printf("spacebar emission %i\n", emissionRateSpacebar);
-    } else if (IsKeyPressed(KEY_RIGHT) && emissionRateSpacebar < EMISSION_RATE_MAX) {
+    } else if (IsKeyPressed(increaseBottomCenterEmissionRate) && emissionRateSpacebar < EMISSION_RATE_MAX) {
       emissionRateSpacebar++;
       particleTimeSpacebar = 1.0f / emissionRateSpacebar;
       printf("spacebar emission %i\n", emissionRateSpacebar);
+    } else if (IsKeyPressed(decreaseCursorEmissionRate) && emissionRateMouse < EMISSION_RATE_MAX) {
+      emissionRateMouse--;
+      particleTimeMouse = 1.0f / emissionRateMouse;
+      printf("mouse emission %i\n", emissionRateMouse);
+    } else if (IsKeyPressed(increaseCursorEmissionRate) && emissionRateMouse < EMISSION_RATE_MAX) {
+      emissionRateMouse++;
+      particleTimeMouse = 1.0f / emissionRateMouse;
+      printf("mouse emission %i\n", emissionRateMouse);
     }
 
     updateParticles(particles, PARTICLE_ARRAY_SIZE, GetFrameTime());

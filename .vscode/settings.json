@@ -27,5 +27,11 @@
     "**/.*/**",
     "**/.vscode",
     "**/.vscode/**"
-  ]
+  ],
+  "files.associations": {
+    "xstring": "cpp",
+    "*.m": "cpp",
+    "fstream": "cpp",
+    "istream": "cpp"
+  }
 }
