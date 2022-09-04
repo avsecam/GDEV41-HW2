@@ -4,23 +4,9 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <fstream>
+#include <string>
 
-void readConfigFile()
-{
-  std::ifstream configFile("./config.ini");
-  std::string s, k;
-  while(configFile >> s >> k)
-  {
-    if(s == "EMIT_BOTTOM_CENTER")
-    {
 
-    }
-    else if(s == "EMIT_CURSOR")
-    {
-
-    }
-  }
-}
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -30,12 +16,12 @@ const int EMISSION_RATE_MIN = 1;
 const int EMISSION_RATE_MAX = 50;
 
 
-MouseButton cursorInput = MOUSE_BUTTON_LEFT;
-KeyboardKey bottomCenterInput = KEY_SPACE;
-KeyboardKey decreaseBottomCenterEmissionRate = KEY_LEFT;
-KeyboardKey increaseBottomCenterEmissionRate = KEY_RIGHT;
-KeyboardKey decreaseCursorEmissionRate = KEY_DOWN;
-KeyboardKey increaseCursorEmissionRate = KEY_UP;
+MouseButton cursorMouseInput, bottomCenterMouseInput;
+KeyboardKey cursorKeyboardInput, bottomCenterKeyboardInput;
+KeyboardKey decreaseBottomCenterEmissionRate;
+KeyboardKey increaseBottomCenterEmissionRate;
+KeyboardKey decreaseCursorEmissionRate;
+KeyboardKey increaseCursorEmissionRate;
 
 
 struct Particle {
@@ -57,14 +43,58 @@ float randf(const float min, const float max);
 
 
 int main() {
- 
+  std::ifstream configFile("./config.ini");
+  std::string s, i, k;
+  int keyNumber;
+  while(configFile >> s >> i >> k)
+  {
+    keyNumber = std::stoi(k);
+    if(s == "EMIT_BOTTOM_CENTER")
+    {
+      if (i == "keyboard") // If number is less than 6, it is a mouse input
+      {
+        bottomCenterKeyboardInput = KeyboardKey(keyNumber);
+      }
+      else if (i == "mouse")
+      {
+        bottomCenterMouseInput = MouseButton(keyNumber);
+      }    
+    }
+    else if(s == "EMIT_CURSOR")
+    {
+      if (i == "keyboard") // If number is less than 6, it is a mouse input
+      {
+        cursorKeyboardInput = KeyboardKey(keyNumber);
+      }
+      else if (i == "mouse")
+      {
+        cursorMouseInput = MouseButton(keyNumber);
+      }
+    }
+    else if(s == "DECREASE_BOTTOM_CENTER_RATE")
+    {
+      decreaseBottomCenterEmissionRate = KeyboardKey(keyNumber);
+    }
+    else if(s == "INCREASE_BOTTOM_CENTER_RATE")
+    {
+      increaseBottomCenterEmissionRate = KeyboardKey(keyNumber);
+    }
+    else if(s == "DECREASE_CURSOR_RATE")
+    {
+      decreaseCursorEmissionRate = KeyboardKey(keyNumber);
+    }
+    else if(s == "INCREASE_CURSOR_RATE")
+    {
+      increaseCursorEmissionRate = KeyboardKey(keyNumber);
+    }
+  }
   int emissionRateSpacebar = 20; // [1, 50]
   int emissionRateMouse = 40;
   float particleTimeSpacebar = 1.0f / emissionRateSpacebar; // Max time before another particle is emitted
   float particleTimeMouse = 1.0f / emissionRateMouse;
   float particleCooldownSpacebar = particleTimeSpacebar; // Remaining time before emission
   float particleCooldownMouse = particleTimeMouse;
-  // readConfigFile();
+  
 
   Particle* particles = new Particle[PARTICLE_ARRAY_SIZE];
   // All particles are inactive at this point. Step 4
@@ -76,14 +106,14 @@ int main() {
     BeginDrawing();
     ClearBackground(WHITE);
 
-    if (IsKeyDown(bottomCenterInput)) {
+    if (IsKeyDown(bottomCenterMouseInput|bottomCenterKeyboardInput)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
       if (nextInactiveParticleIndex != -1 && particleCooldownSpacebar == particleTimeSpacebar) {
         emitParticleSpacebar(particles[nextInactiveParticleIndex]);
       } 
     }
 
-    if (IsMouseButtonDown(cursorInput)) {
+    if (IsMouseButtonDown(cursorMouseInput|cursorKeyboardInput)) {
       nextInactiveParticleIndex = findInactiveParticleIndex(particles, PARTICLE_ARRAY_SIZE);
       if (nextInactiveParticleIndex != -1 && particleCooldownMouse == particleTimeMouse) {
         emitParticleMouse(particles[nextInactiveParticleIndex], GetMouseX(), GetMouseY());
@@ -197,4 +227,9 @@ void updateParticles(Particle* array, const int size, const float deltaTime) {
 float randf(const float min, const float max) {	
   float result = (rand() / static_cast<float>(RAND_MAX) * (max + 1)) + min;
   return result;
+}
+
+void readConfigFile()
+{
+  
 }
